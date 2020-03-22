@@ -23,4 +23,17 @@ while shuffled_deck.cards.length > 0 do
   deck1.add_card(shuffled_deck.remove_card)
   deck2.add_card(shuffled_deck.remove_card)
 end
-require "pry"; binding.pry
+
+player1 = Player.new("Kyle", deck1)
+player2 = Player.new("Geoff", deck2)
+
+p "Welcome to War! (or Peace) This game will be played with 52 cards."
+p "The players today are #{player1.name}, and #{player2.name}."
+prompt =  "Type 'GO' to start the game!"
+go = ""
+until go == "GO" || go == "go" || go == "Go"
+  p prompt
+  go = gets.chomp
+end
+# p "working"
+# require "pry"; binding.pry
