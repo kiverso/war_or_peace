@@ -45,26 +45,71 @@ class Turn
       spoils_of_war << player2.deck.remove_card
     elsif type == :war
       3.times do
-        spoils_of_war << player1.deck.remove_card
+        if player1.has_lost == true
+          break
+        else
+          spoils_of_war << player1.deck.remove_card
+        end
       end
       3.times do
-        spoils_of_war << player2.deck.remove_card
+        if player2.has_lost == true
+          break
+        else
+          spoils_of_war << player2.deck.remove_card
+        end
       end
     elsif type == :mutually_assured_destruction
       3.times do
-        player1.deck.remove_card
-        player2.deck.remove_card
+        if player1.has_lost == true || player2.has_lost == true
+          break
+        else
+          player1.deck.remove_card
+          player2.deck.remove_card
+        end
       end
     end
   end
 
-  def award_spoils
+  def award_spoils(winner)
     turn_winner = winner
     pile_cards
     if type == :basic || type == :war
       spoils_of_war.each do|card|
         turn_winner.deck.add_card(card)
       end
+    end
+  end
+
+  def start
+    turn_counter = 1
+    maximum_turns = 1000000
+    while player1.has_lost == false && player2.has_lost == false
+      if turn_counter <= maximum_turns
+        if type == :basic
+          p "Turn #{turn_counter}: #{winner.name} won 2 cards"
+          award_spoils(winner)
+          turn_counter += 1
+        elsif type == :war
+          p "Turn #{turn_counter}: WAR - #{winner.name} won 6 cards."
+          award_spoils(winner)
+          turn_counter += 1
+        elsif type == :mutually_assured_destruction
+          p "Turn #{turn_counter}: *mutually_assured_destruction* 6 cards removed from play"
+          pile_cards
+          turn_counter += 1
+          # require "pry"; binding.pry
+        end
+      else
+        p "--- DRAW ---"
+        break
+      end
+    end
+    if player1.has_lost == true && player2.has_lost == true
+      p "---- DRAW ----"
+    elsif player2.has_lost == true
+      p "*~*~*~* #{player1.name} has won the game! *~*~*~*"
+    elsif player1.has_lost == true
+      p "*~*~*~* #{player2.name} has won the game! *~*~*~*"
     end
   end
 end
