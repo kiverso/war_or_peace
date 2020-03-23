@@ -11,8 +11,17 @@ class Turn
     if player1.deck.rank_of_card_at(0) != player2.deck.rank_of_card_at(0)
       type = :basic
 
+    elsif (player1.deck.cards.length < 3 && player2.deck.cards.length >= 3) && player1.deck.rank_of_card_at(0) == player2.deck.rank_of_card_at(0)
+      type = :war
+
     elsif player1.deck.rank_of_card_at(0) == player2.deck.rank_of_card_at(0) && player1.deck.rank_of_card_at(2) != player2.deck.rank_of_card_at(2)
       type = :war
+
+    elsif (player2.deck.cards.length < 3 && player1.deck.cards.length >= 3) && player1.deck.rank_of_card_at(0) == player2.deck.rank_of_card_at(0)
+      type = :war
+
+    elsif (player1.deck.cards.length < 3 && player2.deck.cards.length < 3) && player1.deck.rank_of_card_at(0) == player2.deck.rank_of_card_at(0)
+      type = :mutually_assured_destruction
 
     elsif player1.deck.rank_of_card_at(0) == player2.deck.rank_of_card_at(0) && player1.deck.rank_of_card_at(2) == player2.deck.rank_of_card_at(2)
       type = :mutually_assured_destruction
@@ -28,7 +37,11 @@ class Turn
       end
 
     elsif type == :war
-      if player1.deck.rank_of_card_at(2) > player2.deck.rank_of_card_at(2)
+      if player1.deck.cards.length < 3 && player2.deck.cards.length >= 3
+        winner = player2
+      elsif player2.deck.cards.length < 3 && player2.deck.cards.length >= 3
+        winner = player1
+      elsif player1.deck.rank_of_card_at(2) > player2.deck.rank_of_card_at(2)
         winner = player1
       elsif player1.deck.rank_of_card_at(2) < player2.deck.rank_of_card_at(2)
         winner = player2
@@ -47,14 +60,18 @@ class Turn
       3.times do
         if player1.has_lost == true
           break
-        else
+        elsif player1.deck.cards.length < 1
+          break
+        elsif player1.deck.cards.length >= 1
           spoils_of_war << player1.deck.remove_card
         end
       end
       3.times do
         if player2.has_lost == true
           break
-        else
+        elsif player2.deck.cards.length < 1
+          break
+        elsif player2.deck.cards.length >= 1
           spoils_of_war << player2.deck.remove_card
         end
       end
@@ -71,12 +88,15 @@ class Turn
   end
 
   def award_spoils(winner)
+    @spoils_of_war = []
     turn_winner = winner
-    pile_cards
     if type == :basic || type == :war
+      pile_cards
       spoils_of_war.each do|card|
         turn_winner.deck.add_card(card)
       end
+    elsif type == :mutually_assured_destruction
+      pile_cards
     end
   end
 
@@ -97,14 +117,15 @@ class Turn
           p "Turn #{turn_counter}: *mutually_assured_destruction* 6 cards removed from play"
           pile_cards
           turn_counter += 1
-          # require "pry"; binding.pry
         end
       else
-        p "--- DRAW ---"
         break
       end
     end
+    # require "pry"; binding.pry
     if player1.has_lost == true && player2.has_lost == true
+      p "---- DRAW ----"
+    elsif turn_counter > 1000000
       p "---- DRAW ----"
     elsif player2.has_lost == true
       p "*~*~*~* #{player1.name} has won the game! *~*~*~*"
